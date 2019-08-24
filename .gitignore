@@ -105,3 +105,4 @@ venv.bak/
 
 # self defined
 test/
+hashcat/kernels/

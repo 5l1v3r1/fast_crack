@@ -65,9 +65,10 @@ def rar2john(filename):
     :param filename:
     :return:
     """
-    return subprocess.check_output(
+    result = subprocess.check_output(
         f'{rar2john_path} {filename}',
         shell=True).strip().decode()
+    return result.replace(filename, os.path.basename(filename))
 
 
 # 目前存在一些问题，暂时弃用
@@ -146,10 +147,6 @@ def crack_file(input_file, output_file, dict_file):
         raise Exception('请选择正确的输入文件')
     if not os.path.exists(dict_file):
         raise Exception('请选择正确的字典')
-    if os.path.exists(output_file):
-        _replace = input('输出文件已存在，是否替换(Y/n)')
-        if _replace.strip().upper() == 'N':
-            return
     # Zip文件比较特殊，目前Hashcat对pkzip2算法的支持并不完善，只在最新的Beta版中有支持，并且效果一般
     # 所以这里选择直接用John the ripper对Zip进行解密
     # https://github.com/hashcat/hashcat/issues/69
@@ -165,9 +162,9 @@ def crack_file(input_file, output_file, dict_file):
         run(f'{john_path} --format={fmt} --pot={output_file} --wordlist={dict_file} {zip_tmp_hash_file}')
     else:
         file_hash, flag = file_to_flag(input_file)
-        os.chdir('hashcat')
+        os.chdir(hashcat_dir)
 
-        cmd = f'{hashcat_path} -a 0 -m {flag} --username --potfile-disable --status -o {output_file} "{file_hash}" {dict_file}'
+        cmd = f'{hashcat_path} -a 0 -m {flag} --potfile-disable --username --status -o {output_file} "{file_hash}" {dict_file}'
         print(cmd)
         sh(cmd)
 
