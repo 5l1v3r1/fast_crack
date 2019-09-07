@@ -154,12 +154,7 @@ def crack_file(input_file, output_file, dict_file):
     if input_file.endswith('.zip'):
         zip_tmp_hash_file = tempfile.mktemp()
         run(f'{zip2john_path} {input_file} > {zip_tmp_hash_file}')
-        file_hash = open(zip_tmp_hash_file).read()
-        if 'pkzip' in file_hash:
-            fmt = 'PKZIP'
-        else:
-            fmt = 'ZIP'
-        run(f'{john_path} --format={fmt} --pot={output_file} --wordlist={dict_file} {zip_tmp_hash_file}')
+        run(f'{john_path} --pot={output_file} --wordlist={dict_file} {zip_tmp_hash_file}')
     else:
         file_hash, flag = file_to_flag(input_file)
         os.chdir(hashcat_dir)
